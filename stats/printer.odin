@@ -3,11 +3,9 @@ package stats
 import "core:fmt"
 import "core:os"
 import "core:strings"
-//import "core:sys/linux"
-//import "core:sys/darwin"
 
 print_all :: proc(categories: [dynamic]Category) {
-    fmt.printf("[% 4i / % 4i (% 3i) = % 5.2f %%]:  0 %s - %1.2f / %i\n",
+    fmt.printf("[% 4i / % 4i (% 3i) = % 5.2f %%]: %s - %1.2f / %i\n",
         variables[VARIABLES.FINISHED],
         variables[VARIABLES.TOTAL],
         variables[VARIABLES.TRIES],
@@ -58,11 +56,16 @@ print_single :: proc(category: Category) {
         category.began_exercises
     )
 
-    for subcategory in category.subcategories {
-        // 'print_subcategory' returns a boolean for early break
-        if print_subcategory(subcategory) {
-            break
+    subcategory_count := count_subcategories(category.subcategories)
+    for i := 0; i < subcategory_count; i += 1 {
+        if i == subcategory_count - 1 {
+            fmt.printf("\r└──  ")
+        } else {
+            fmt.printf("\r├──  ")
         }
+
+        // 'print_subcategory' returns a boolean for early break
+        print_subcategory(category.subcategories[i])
     }
 }
 
@@ -102,21 +105,38 @@ print_category :: proc(category: Category) {
     )
 }
 
-print_subcategory :: proc(subcategory: Subcategory) -> bool {
-    // Don't print empty subcategories, return true for early break
-    if subcategory.name == "" {
-        return true
-    }
-
+print_subcategory :: proc(subcategory: Subcategory) {
     if subcategory.is_copy {
         //fmt.printf("\bl")
     }
 
-    fmt.printf("[%03i/%03i] %s - %1.2f\n",
-        subcategory.total_tries,
+    percentage: f32
+    if subcategory.total_exercises == 0 {
+        percentage = 100
+    } else {
+        percentage = f32(subcategory.finished_exercises) / f32(subcategory.total_exercises) * 100
+    }
+
+    average_score: f32
+
+    fmt.printf("% 4.0f%% - % 0.2f [% 3i / % 3i (% 3i)]: % 0.2f - %s\n",
+        percentage,
+        average_score,
+        subcategory.finished_exercises,
         subcategory.total_exercises,
+        subcategory.total_tries,
+        subcategory.index,
         subcategory.name,
-        subcategory.total_score / f32(subcategory.total_exercises),
     )
-    return false
+}
+
+count_subcategories :: proc(subcategories: [64]Subcategory) -> int {
+    i := 0
+    for subcategory in subcategories {
+        if subcategory.name == "" {
+            return i
+        }
+        i += 1
+    }
+    return 64
 }

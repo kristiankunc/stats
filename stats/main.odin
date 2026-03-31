@@ -5,6 +5,8 @@ import "core:os"
 import "core:strings"
 import "core:strconv"
 
+EXERCISE_MAX_COUNT :: 512
+
 VARIABLES :: enum u8{
     TOTAL,
     FINISHED,
@@ -38,7 +40,7 @@ Subcategory :: struct{
     finished_exercises: u8,
     total_score: f32,
     total: u16,
-    exercises: [255]Exercise,
+    exercises: [EXERCISE_MAX_COUNT]Exercise,
 }
 
 Exercise :: struct{
@@ -68,7 +70,7 @@ main :: proc() {
     }
     defer delete(data)
 
-    iterator := string(data)
+    lines := string(data)
 
     categories: [dynamic]Category
 
@@ -81,7 +83,7 @@ main :: proc() {
 
     line_number: u8 = 1
 
-    for line in strings.split_lines_iterator(&iterator) {
+    for line in strings.split_lines_iterator(&lines) {
         tokens := strings.split(line, " ")
 
         _, is_number := strconv.parse_uint(tokens[0])

@@ -45,13 +45,39 @@ parse_console :: proc(options: ^Options) -> bool {
     case flags.Validation_Error:
         fmt.println("error: failed to validate input.", err.message)
     case:
-        return true 
+        return verify(options)
     }
     
     return false 
 }
 
+// Input verification
+verify :: proc(options: ^Options) -> bool {
+    // Incorrect file extension
+    _, extension := os.split_filename(os.name(options.file))
+    if extension != "stat" {
+        fmt.printf("error: incorrect file extension: `.%s`.\n", extension)
+        return false
+    }
+
+    return true
+}
+
 print_help :: proc() {
-    fmt.println("usage: stats <file> [-q:int][-f:bool]")
-    fmt.printf("options: \n\tc, category\tSpecify a category to print.\n\tf, failed\tShow failed exercises.\n")
+    fmt.println("usage: stats <file> [-c:int][-f:bool]")
+
+    fmt.printf("options: \n\tc, category\tspecify a category to print.\n\tf, failed\tshow failed exercises.\n")
+
+    fmt.printf("output:\n")
+    fmt.printf("└── ?")
+    fmt.printf(" AAA%% - B.BB [CCC / DDD (EEE)]: FF - <name>\n")
+
+    fmt.printf("legend:\n")
+    fmt.printf("\t?\t\tsymbol: * = finished, ^ = linked\n")
+    fmt.printf("\tAAA\t\tcompletion percentage\n")
+    fmt.printf("\tB.BB\t\taverage score\n")
+    fmt.printf("\tCCC\t\tfinished exercises\n")
+    fmt.printf("\tDDD\t\ttotal exercises\n")
+    fmt.printf("\tEEE\t\ttotal tries\n")
+    fmt.printf("\tFF\t\tindex\n")
 }
