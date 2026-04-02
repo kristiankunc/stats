@@ -29,36 +29,29 @@ print_all :: proc(categories: [dynamic]Category) {
     }
 }
 
-print_all_failed :: proc(categories: [dynamic]Category) {
-    e, s, c: int
+print_all_failed :: proc(categories: [dynamic]Category)
+{
+    failed: bool
+    for category_index := 0; category_index < len(categories); category_index += 1 {
+        for subcategory_index := 0; subcategory_index < SUBCATEGORY_MAX_COUNT; subcategory_index += 1 {
+            for exercise_index := 0; exercise_index < EXERCISE_MAX_COUNT; exercise_index += 1 {
+                exercise: Exercise = categories[category_index].subcategories[subcategory_index].exercises[exercise_index]
+                if exercise.tries >= 1 && exercise.score != 1.0 {
+                    fmt.printf("%i %s - %s - %i\n",
+                        category_index,
+                        categories[category_index - 1].name,
+                        categories[category_index - 1].subcategories[subcategory_index].name,
+                        exercise_index,
+                    )
 
-    for category in categories {
-        for subcategory in category.subcategories {
-            for exercise in subcategory.exercises {
-                if exercise.tries != 0 && exercise.score != 1.0 {
-                    //fmt.println(exercise, i, n)
-                    fmt.printf("% 2i, % 2f - %s, \n",
-                        n,
-                        subcategory.index - 0.1,
-                        category.subcategories[],
-                    )
-                    /*
-                    fmt.printf("% 2i, % 4.2f: %s, %i - % 3i\n",
-                        category.index - 1,
-                        subcategory.index - 0.1,
-                        category.subcategories[n - 1],
-                        i - 1,
-                        exercise.tries
-                    )
-                    */
+                    failed = true
                 }
-                e += 1
             }
-            s += 1
         }
-        c += 1
-        s = 0
-        e = 0
+    }
+
+    if !failed {
+        fmt.println("no failed exercises. CONGRATULATIONS!")
     }
 }
 

@@ -6,6 +6,7 @@ import "core:strings"
 import "core:strconv"
 
 EXERCISE_MAX_COUNT :: 512
+SUBCATEGORY_MAX_COUNT :: 64
 
 VARIABLES :: enum u8{
     TOTAL,
@@ -27,7 +28,7 @@ Category :: struct{
     finished_exercises: u8,
     total_score: f32,
     total: u16,
-    subcategories: [64]Subcategory,
+    subcategories: [SUBCATEGORY_MAX_COUNT]Subcategory,
 }
 
 Subcategory :: struct{
@@ -65,7 +66,8 @@ main :: proc() {
     // Open the selected file
     data, err := os.read_entire_file_from_file(options.file, context.allocator)
     if err != nil {
-        fmt.printf("error: could not open file '%s'\n", options.file)
+        print_bold("error ")
+        fmt.printf("could not open file '%s'\n", options.file)
         return
     }
     defer delete(data)
@@ -104,13 +106,16 @@ main :: proc() {
         // Subcategory
         } else if tokens[0] == "==" {
             categories[category_index - 1].subcategories[subcategory_index].total_exercises = 0
-            subcategory.name = strings.cut(line, 3)
+
+            // Extract the name (disgusting)
+            subcategory.name = strings.split_after_n(strings.cut(line, 3), " ", 2)[1]
 
             // Get index (== >5.2< Random subcategory)
             parse_ok: bool
             subcategory.index, parse_ok = strconv.parse_f32(tokens[2])
             if !parse_ok {
-                fmt.printf("error [%i]: could not parse subcategory index\n", line_number)
+                print_bold(fmt.tprintf("error [%i]: ", line_number))
+                fmt.printf("could not parse subcategory index\n")
                 return
             }
 
@@ -119,7 +124,8 @@ main :: proc() {
             // Total exercises
             total_exercises, ok := strconv.parse_uint(tokens[1])
             if !ok {
-                fmt.printf("error [%i]: could not parse total exercises\n", line_number)
+                print_bold(fmt.tprintf("error [%i]: ", line_number))
+                fmt.printf("could not parse total exercises\n")
                 return
             }
 
@@ -138,7 +144,8 @@ main :: proc() {
             // Get the linked subcategory index
             linking_index, ok := strconv.parse_f32(tokens[1])
             if !ok {
-                fmt.printf("error [%i]: could not parse subcategory linking index\n", line_number)
+                print_bold(fmt.tprintf("error [%i]: ", line_number))
+                fmt.printf("could not parse subcategory linking index\n")
                 return
             }
 
@@ -182,7 +189,8 @@ main :: proc() {
                 }
             } else {
                 // Did not find a linked subcategory
-                fmt.printf("error [%i]: could not find the subcategory, ensure it is defined before\n", line_number)
+                print_bold(fmt.tprintf("error [%i]:", line_number))
+                fmt.printf("could not find the subcategory, ensure it is defined before\n")
                 return
             }
 
@@ -190,7 +198,8 @@ main :: proc() {
         } else if is_number {
             exercise, ok := get_exercise(line)
             if !ok {
-                fmt.printf("error [%i]: failed to parse exercise\n", line_number)
+                print_bold(fmt.tprintf("error [%i]:", line_number))
+                fmt.printf("failed to parse exercise\n")
                 return
             }
 
@@ -231,10 +240,12 @@ main :: proc() {
         } else {
             // Check existance
             if options.category > len(categories) {
-                fmt.println("error: category of index `%i` does not exist.\n", options.category)
+                print_bold("error: ")
+                fmt.println("category of index `%i` does not exist.\n", options.category)
                 return
             } else if options.c > len(categories) {
-                fmt.println("error: category of index `%i` does not exist.\n", options.c)
+                print_bold("error: ")
+                fmt.println("category of index `%i` does not exist.\n", options.c)
                 return
             }
             print_single_failed(categories[options.category + options.c - 1])
@@ -245,10 +256,12 @@ main :: proc() {
         } else {
             // If category doesn't exist
             if options.category > len(categories) {
-                fmt.printf("error: category of index `%i` does not exist.\n", options.category)
+                print_bold("error: ")
+                fmt.printf("category of index `%i` does not exist.\n", options.category)
                 return
             } else if options.c > len(categories) {
-                fmt.printf("error: category of index `%i` does not exist.\n", options.c)
+                print_bold("error: ")
+                fmt.printf("category of index `%i` does not exist.\n", options.c)
                 return
             }
             print_single(categories[options.category + options.c - 1]) // -1 for "human" indexing

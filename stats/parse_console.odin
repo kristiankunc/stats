@@ -3,6 +3,10 @@ package stats
 import "core:fmt"
 import "core:flags"
 import "core:os"
+import "core:terminal/ansi"
+
+BOLD :: "\033[1m"
+RESET :: "\033[22m"
 
 Options :: struct{
     _: string `args:"pos=0"`,
@@ -18,7 +22,8 @@ parse_console :: proc(options: ^Options) -> bool {
 
     switch err in error {
     case flags.Parse_Error:
-        fmt.print("error: failed to parse.")
+        print_bold("error: ")
+        fmt.print("failed to parse.")
 
         switch err.reason {
         case .Extra_Positional:
@@ -32,7 +37,8 @@ parse_console :: proc(options: ^Options) -> bool {
         }
 
     case flags.Open_File_Error:
-        fmt.printf("error: failed to open file `%s`.", err.filename)
+        print_bold("error: ")
+        fmt.printf("failed to open file `%s`.", err.filename)
 
         // Print more descriptive error info
         if (err.errno == .Not_Exist) {
@@ -43,7 +49,8 @@ parse_console :: proc(options: ^Options) -> bool {
     case flags.Help_Request:
         print_help()
     case flags.Validation_Error:
-        fmt.println("error: failed to validate input.", err.message)
+        print_bold("error: ")
+        fmt.println("failed to validate input.", err.message)
     case:
         return verify(options)
     }
@@ -56,8 +63,15 @@ verify :: proc(options: ^Options) -> bool {
     // Incorrect file extension
     _, extension := os.split_filename(os.name(options.file))
     if extension != "stat" {
-        fmt.printf("error: incorrect file extension: `.%s`.\n", extension)
+        print_bold("error: ")
+        fmt.printf("incorrect file extension: `.%s`.\n", extension)
         return false
+    }
+
+    // WARNING TODO
+    if options.f || options.failed {
+        print_bold("warning: ")
+        fmt.printf("option not yet implemented, results may vary.\n")
     }
 
     return true
@@ -80,4 +94,8 @@ print_help :: proc() {
     fmt.printf("\tDDD\t\ttotal exercises\n")
     fmt.printf("\tEEE\t\ttotal tries\n")
     fmt.printf("\tFF\t\tindex\n")
+}
+
+print_bold :: proc(input: string) {
+    fmt.printf(ansi.CSI + ansi.BOLD + ansi.SGR + "%s" + ansi.CSI + ansi.RESET + ansi.SGR, input)
 }
