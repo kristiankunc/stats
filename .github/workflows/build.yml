@@ -10,26 +10,16 @@ jobs:
         strategy:
             matrix:
                 include:
-                    # Windows
                     - os: windows-latest
-                      target: windows_amd64
-                      artifact-name: stats-windows-x86.exe
+                      artifact-name: stats-windows.exe
                       output: stats.exe
 
-                    # Linux
                     - os: ubuntu-latest
-                      target: linux_amd64
-                      artifact-name: stats-linux-x86
+                      artifact-name: stats-linux
                       output: stats
 
-                    # macOS
                     - os: macos-latest
-                      target: darwin_amd64
-                      artifact-name: stats-macos-x86
-                      output: stats
-                    - os: macos-latest
-                      target: darwin_arm64
-                      artifact-name: stats-macos-arm
+                      artifact-name: stats-macos
                       output: stats
 
         runs-on: ${{ matrix.os }}
@@ -45,8 +35,8 @@ jobs:
               with:
                   release: dev-2026-03
 
-            - name: Build for ${{ matrix.target }}
-              run: odin build stats -target:${{ matrix.target }}
+            - name: Build
+              run: odin build stats
               working-directory: .
 
             - name: Debug - List files
