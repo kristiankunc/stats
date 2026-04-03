@@ -15,19 +15,11 @@ jobs:
                       target: windows_amd64
                       artifact-name: stats-windows-x86.exe
                       output: stats.exe
-                    - os: windows-latest
-                      target: windows_arm64
-                      artifact-name: stats-windows-arm.exe
-                      output: stats.exe
 
                     # Linux
                     - os: ubuntu-latest
                       target: linux_amd64
                       artifact-name: stats-linux-x86
-                      output: stats
-                    - os: ubuntu-latest
-                      target: linux_arm64
-                      artifact-name: stats-linux-arm
                       output: stats
 
                     # macOS
